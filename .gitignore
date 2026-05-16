@@ -13,3 +13,5 @@ Thumbs.db
 # Editor
 .vscode/
 *.swp
+
+LOG.md
