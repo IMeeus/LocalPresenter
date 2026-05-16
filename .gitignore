@@ -1,0 +1,15 @@
+# Generated output — excluded per project
+**/slide-audio/
+**/slide-images/
+**/output/
+
+# Piper voice models (large binary files — download separately)
+.piper/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
