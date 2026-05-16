@@ -12,7 +12,8 @@
     Absolute path to the project folder (must contain a 'slides' subfolder).
 
 .PARAMETER ModelPath
-    Path to the piper ONNX voice model. Defaults to .piper\models\en_US-lessac-medium.onnx
+    Path to the piper ONNX voice model. Defaults to the model specified in the project's
+    config.json (voiceModel field), falling back to .piper\models\en_US-lessac-medium.onnx
     relative to the repository root (two levels above this script's location).
 
 .EXAMPLE
@@ -31,7 +32,13 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..") | Select-Object -ExpandProperty Path
 
 if (-not $ModelPath) {
-    $ModelPath = Join-Path $repoRoot ".piper\models\en_US-lessac-medium.onnx"
+    $defaultModel = "en_US-lessac-medium"
+    $configFile = Join-Path $ProjectPath "config.json"
+    if (Test-Path $configFile) {
+        $config = Get-Content $configFile -Raw | ConvertFrom-Json
+        if ($config.voiceModel) { $defaultModel = $config.voiceModel }
+    }
+    $ModelPath = Join-Path $repoRoot ".piper\models\$defaultModel.onnx"
 }
 
 $ProjectPath = Resolve-Path $ProjectPath | Select-Object -ExpandProperty Path
@@ -49,7 +56,7 @@ foreach ($dir in @($imagesDir, $audioDir, $outputDir)) {
 }
 
 if (-not (Test-Path $ModelPath)) {
-    Write-Error "Piper model not found at: $ModelPath`nExpected at: .piper\models\en_US-lessac-medium.onnx in the repo root."
+    Write-Error "Piper model not found at: $ModelPath"
     exit 1
 }
 
