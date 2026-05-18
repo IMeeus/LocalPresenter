@@ -57,7 +57,22 @@ Write scripts in natural spoken language — this is exactly what will be narrat
 
 Follow the rules in [`rules.md`](rules.md) for characters to avoid, generics/abbreviations, and pause tags.
 
-## 6. Summarize and hand off
+## 6. Consistency review
+
+Before handing off, review all slides and audio scripts for issues introduced by the changes just made. Work through these checks:
+
+1. **Slide-audio pairing** — every `NN-*.md` has a matching `NN-*.txt` and vice versa
+2. **Sequential numbering** — NN prefixes form a complete sequence with no gaps or duplicates
+3. **Stale enumeration refs** — audio or slides mention "Option N / Option one/two..." but no option list exists in any slide
+4. **Stale cross-slide refs** — phrases like "as shown in slide X" or "in the previous slide" that point to deleted/renumbered content
+5. **Terminology consistency** — the same concept named differently in different files (type names, team names, etc.)
+6. **Formatting consistency** — bold/italic applied inconsistently to the same recurring term across slides
+7. **Deleted concept references** — audio or slides still reference something that was removed (a slide, a section, an option)
+8. **Audio script rules** — no em dashes (`—`), curly quotes (`"`), or generic type parameters in `.txt` files
+
+Fix any issues found immediately. If a fix requires a content judgment call, describe the options and ask the user.
+
+## 7. Summarize and hand off
 
 After completing all changes, list:
 - Files created or modified

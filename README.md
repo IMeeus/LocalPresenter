@@ -106,7 +106,7 @@ Welcome, everyone. [pause:1s] Today I'll be talking about ...
 
 ## Copilot CLI Skills
 
-This repo ships three Copilot CLI project skills. Launch `copilot` from this repo root to use them.
+This repo ships four Copilot CLI project skills. Launch `copilot` from this repo root to use them.
 
 ### `/setup-presentation` — Create a new project
 
@@ -146,6 +146,19 @@ Use the /render-presentation skill to render my-talk
 ```
 
 The final video will be at `my-talk/output/presentation.mp4`.
+
+---
+
+### `/review-presentation` — Check for inconsistencies
+
+Reviews all slides and audio scripts in a project for consistency issues: stale references, formatting gaps, renumbering artifacts, audio rule violations, and narrative overlap. Fixes mechanical issues automatically; asks about anything requiring a content decision.
+
+**Example prompt:**
+```
+Use the /review-presentation skill to check my-talk
+```
+
+This skill also runs automatically at the end of every `/build-presentation` update.
 
 ---
 
