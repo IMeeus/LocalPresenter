@@ -24,13 +24,7 @@ Where `<repo-root>` is the root of the presenter repository (the current working
 
 ## 3. Gather context
 
-Content for slides and narration can come from two sources — use both if available:
-
-**a) Context folder** — Check whether `<project-name>/context/` contains any files. If so, read them all. These are the primary source of truth for slide content and narration. Do not invent facts not supported by this material.
-
-**b) Prompt content** — Any description, notes, or instructions the user provided directly in their message.
-
-If neither source provides enough detail to author the presentation, ask the user for the information you need before proceeding.
+Content for slides and narration comes from the user's prompt — any description, notes, or instructions provided directly in their message. If there isn't enough detail to author the presentation, ask the user for the information you need before proceeding.
 
 ## 4. Author slides
 

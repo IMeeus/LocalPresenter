@@ -11,7 +11,6 @@ Each presentation project lives in its own folder under the repo root:
 
 ```
 {project-name}/
-├── context/                 ← source material (docs, notes) that slides and narration are based on
 ├── slides/                  ← markdown files named NN-description.md (e.g. 01-intro.md)
 ├── slide-audio-scripts/     ← plain text files matching slide names (e.g. 01-intro.txt)
 ├── slide-audio/             ← (generated) WAV audio per slide
@@ -36,4 +35,3 @@ Each presentation project lives in its own folder under the repo root:
 - Slides must begin with marp frontmatter (`marp: true`)
 - Audio scripts are plain text; they become the spoken narration for that slide
 - Use `[pause:Xs]` in audio scripts (e.g. `[pause:1.5s]`) to insert timed silences
-- Context files in `context/` are the source of truth for slide and narration content — read them before authoring
