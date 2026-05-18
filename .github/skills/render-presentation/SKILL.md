@@ -2,6 +2,7 @@
 name: render-presentation
 description: Renders a presentation project into a video by converting slides to images with marp, generating audio with Kokoro-FastAPI, and combining them with ffmpeg. Use when a user asks to render, generate, build, or produce a video from a presentation project.
 allowed-tools: shell
+disable-model-invocation: true
 ---
 
 # render-presentation skill

@@ -26,8 +26,7 @@ Each presentation project lives in its own folder under the repo root:
 
 ## Skills available
 
-- `/setup-presentation` — initialize a new project folder structure
-- `/update-presentation` — add or update slides and audio scripts
+- `/build-presentation` — set up a new project and author or update its slides and audio scripts
 - `/render-presentation` — run the full pipeline to generate the video
 
 ## Conventions
