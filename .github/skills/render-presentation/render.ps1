@@ -91,7 +91,13 @@ foreach ($slide in $slides) {
     $hasAudio   = Test-Path $scriptFile
     if ($hasAudio) {
         Write-Host "[piper] $base.txt -> slide-audio\$base.wav"
-        Get-Content $scriptFile -Raw |
+        $scriptText = Get-Content $scriptFile -Raw -Encoding UTF8
+        # Normalize Unicode typographic characters that piper cannot handle.
+        $scriptText = $scriptText -replace '\u2014', ' - '   # em dash —
+        $scriptText = $scriptText -replace '\u2013', ' - '   # en dash –
+        $scriptText = $scriptText -replace '[\u201C\u201D]', '"'  # curly double quotes
+        $scriptText = $scriptText -replace '[\u2018\u2019]', "'"  # curly single quotes
+        $scriptText |
             & piper --model $ModelPath --output_file $wavFile
         if (-not (Test-Path $wavFile)) {
             Write-Error "piper failed to produce audio for: $base.txt"

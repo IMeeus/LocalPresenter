@@ -1,0 +1,1 @@
+Today we're looking at a race condition in NPoco's mapping factory — a bug that only surfaces during rolling deploys, permanently corrupts generated IL, and stays broken until the process restarts. Let's dig into exactly what's happening and what the fix looks like.

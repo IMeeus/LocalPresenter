@@ -48,6 +48,13 @@ For example: `slides/02-overview.md` → `slide-audio-scripts/02-overview.txt`
 
 The text in the script is exactly what will be spoken aloud for that slide. Write it in natural spoken language (not markdown).
 
+**Audio script authoring rules — avoid characters piper cannot handle:**
+- ❌ `—` (em dash), `–` (en dash) → use ` - ` instead
+- ❌ `"` `"` (curly double quotes) → use `"` straight double quotes
+- ❌ `'` `'` (curly single quotes / apostrophes) → use `'` straight apostrophe
+
+Use plain ASCII punctuation throughout. The render pipeline will sanitize these characters as a safety net, but writing them correctly from the start avoids surprises.
+
 ## 5. Summarize changes
 
 After making all changes, list what was added or updated:

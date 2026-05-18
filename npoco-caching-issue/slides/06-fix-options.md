@@ -1,0 +1,17 @@
+---
+marp: true
+theme: default
+---
+
+# Fix Options
+
+| Approach | Fixes root cause | Runtime overhead | Complexity |
+|---|---|---|---|
+| **1. Static mutex in `Fulfill`** | Indirectly | None (after first compile) | Low |
+| **2. Startup pre-warming** | Indirectly | None (after startup) | Medium |
+| **3. Separate `Fetch` calls** | ❌ Not fully | Extra DB round-trips | Medium |
+| **4. Fork & patch NPoco** | ✅ Directly | None | Low + maintenance |
+
+**Recommended:** Option 1 — safest, lowest-risk, zero new dependencies
+
+**Most correct:** Option 4 — 5-line fix at the root, but you own a forked DLL
