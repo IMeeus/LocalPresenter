@@ -9,18 +9,7 @@ theme: default
 
 When two threads compile factories concurrently, they can both read the same `Count` before either calls `Add`:
 
-```mermaid
-sequenceDiagram
-    participant A as Thread A<br/>(AbsenceRequest)
-    participant L as m_Converters [ ]
-    participant B as Thread B<br/>(ClockingRequest)
-
-    A->>L: Count → 5 (bake index 5 for UserConverter)
-    B->>L: Count → 5 (bake index 5 for WorkflowConverter)
-    A->>L: Add(UserConverter)     → [5] = UserConverter ✓
-    B->>L: Add(WorkflowConverter) → [6] = WorkflowConverter
-    Note over B,L: Thread B's IL uses index 5 → UserConverter ✗
-```
+![Race condition sequence diagram](../ctx/race-condition.png)
 
 Thread B's factory permanently looks up index **5** expecting a workflow converter — but finds the user converter instead → `InvalidCastException` on every call.
 

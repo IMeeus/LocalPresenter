@@ -7,9 +7,6 @@ theme: default
 
 *Root cause: deep inside `MappingFactory` — the component responsible for turning database column values into .NET types.*
 
-- **Simple types** (int, string, DateTime): direct, trivial mapping
-- **Complex types** (e.g. `IAggregateReference<IUser,int>`): a **custom converter** function is used
-
 On first use, NPoco generates a factory delegate via IL emission. Each custom converter is stored in a **static, process-wide list** — and its position in that list is **permanently baked** into the generated IL:
 
 ```csharp
