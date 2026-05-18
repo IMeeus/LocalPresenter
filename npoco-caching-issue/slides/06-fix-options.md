@@ -12,6 +12,6 @@ theme: default
 | **3. Separate `Fetch` calls** | ❌ Not fully | Extra DB round-trips | Medium |
 | **4. Fork & patch NPoco** | ✅ Directly | None | Low + maintenance |
 
-**Recommended:** Option 1 — safest, lowest-risk, zero new dependencies
+**Recommended:** Option 4 — fixes the root cause directly; fork already exists
 
-**Most correct:** Option 4 — 5-line fix at the root, but you own a forked DLL
+**Alternative:** Option 1 — zero new dependencies, lowest code-change risk

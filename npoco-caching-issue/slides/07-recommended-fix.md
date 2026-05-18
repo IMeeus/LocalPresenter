@@ -3,34 +3,31 @@ marp: true
 theme: default
 ---
 
-# Recommended Fix: Static Mutex
+# Recommended Fix: Fork & Patch NPoco
 
-A **non-generic** static guard class ensures process-wide serialisation:
-
-```csharp
-internal static class NPocoFactoryCompilationGuard {
-    internal static readonly SemaphoreSlim Lock = new SemaphoreSlim(1, 1);
-    internal static readonly ConcurrentDictionary<Type, bool> CompiledTypes = new();
-}
-```
-
-Double-checked locking in `Fulfill` — zero overhead after first compile:
+Since we already maintain a fork, the cleanest fix is a **5-line patch** directly in NPoco's `MappingFactory`:
 
 ```csharp
-protected IReadOnlyList<TRequestDto> Fulfill(QueryBuilder q, bool fromRead = true)
+// MappingFactory.cs (NPoco fork)
+private static readonly object _convertersLock = new object();
+
+private static void AddConverterToStack(ILGenerator il, Func<object, object> converter)
 {
-    if (NPocoFactoryCompilationGuard.CompiledTypes.ContainsKey(typeof(TRequestDto)))
-        return FulfillInternal(q, fromRead);   // fast path — no lock ever touched
-
-    NPocoFactoryCompilationGuard.Lock.Wait();
-    try {
-        if (NPocoFactoryCompilationGuard.CompiledTypes.ContainsKey(typeof(TRequestDto)))
-            return FulfillInternal(q, fromRead);
-        var result = FulfillInternal(q, fromRead);
-        NPocoFactoryCompilationGuard.CompiledTypes[typeof(TRequestDto)] = true;
-        return result;
-    } finally { NPocoFactoryCompilationGuard.Lock.Release(); }
+    if (converter != null)
+    {
+        int converterIndex;
+        lock (_convertersLock)
+        {
+            converterIndex = m_Converters.Count;
+            m_Converters.Add(converter);
+        }
+        il.Emit(OpCodes.Ldsfld, fldConverters);
+        il.Emit(OpCodes.Ldc_I4, converterIndex);
+        il.Emit(OpCodes.Callvirt, fnListGetItem);
+    }
 }
 ```
 
-⚠️ The guard **must be non-generic** — statics on a generic class are per closed type.
+✅ Fixes the root cause — no more race on the converter list  
+✅ Protects **all** NPoco fetch paths, not just our call site  
+✅ Fork already exists — add a comment explaining why
