@@ -65,6 +65,12 @@ foreach ($dir in @($imagesDir, $audioDir, $outputDir)) {
     }
 }
 
+# Clear slide-images and slide-audio before rendering
+Write-Host "Clearing slide-images and slide-audio ..."
+Get-ChildItem -Path $imagesDir | Remove-Item -Force -Recurse
+Get-ChildItem -Path $audioDir  | Remove-Item -Force -Recurse
+Write-Host ""
+
 $slides = Get-ChildItem -Path $slidesDir -Filter "*.md" | Sort-Object Name
 
 if ($slides.Count -eq 0) {

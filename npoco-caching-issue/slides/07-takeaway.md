@@ -5,7 +5,7 @@ theme: default
 
 # Takeaway
 
-**The bug:** NPoco bakes converter indices into generated IL using a non-atomic read-then-append on a static list. Concurrent first-use compilations assign the same index to different converters → permanently broken factory, cached for 1 hour.
+**The bug:** NPoco bakes converter indices into generated IL using a non-atomic read-then-append on a static list. Concurrent first-use compilations assign the same index to different converters → permanently broken factory, cached indefinitely.
 
 **The fix:** A 5-line patch in our NPoco fork — add a lock object, make the read-then-append atomic. Protects every NPoco fetch path in the codebase.
 
