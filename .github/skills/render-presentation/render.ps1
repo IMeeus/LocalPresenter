@@ -3,18 +3,18 @@
     Renders a presenter project into a presentation video.
 
     Pipeline:
-      1. marp  — converts each slides/NN-*.md to a PNG in slide-images/
-      2. piper — converts each slide-audio-scripts/NN-*.txt to WAV in slide-audio/
+      1. marp   — converts each slides/NN-*.md to a PNG in slide-images/
+      2. kokoro — converts each slide-audio-scripts/NN-*.txt to WAV in slide-audio/
+                  via the Kokoro-FastAPI server (supports [pause:Xs] tags)
       3. ffmpeg — combines each PNG + WAV into a per-slide MP4 segment
       4. ffmpeg — concatenates all segments into output/presentation.mp4
 
 .PARAMETER ProjectPath
     Absolute path to the project folder (must contain a 'slides' subfolder).
 
-.PARAMETER ModelPath
-    Path to the piper ONNX voice model. Defaults to the model specified in the project's
-    config.json (voiceModel field), falling back to .piper\models\en_US-lessac-medium.onnx
-    relative to the repository root (two levels above this script's location).
+.PARAMETER KokoroUrl
+    Base URL of the Kokoro-FastAPI server. Overrides the kokoroUrl field in the
+    repo-root config.json. Defaults to http://localhost:8880.
 
 .EXAMPLE
     .\render.ps1 -ProjectPath "C:\src\projects\presenter\hello-world"
@@ -23,7 +23,7 @@ param(
     [Parameter(Mandatory)]
     [string]$ProjectPath,
 
-    [string]$ModelPath = ""
+    [string]$KokoroUrl = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -31,14 +31,24 @@ $ErrorActionPreference = "Stop"
 # Resolve repo root (script is at .github/skills/render-presentation/render.ps1)
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..") | Select-Object -ExpandProperty Path
 
-if (-not $ModelPath) {
-    $defaultModel = "en_US-lessac-medium"
-    $configFile = Join-Path $ProjectPath "config.json"
-    if (Test-Path $configFile) {
-        $config = Get-Content $configFile -Raw | ConvertFrom-Json
-        if ($config.voiceModel) { $defaultModel = $config.voiceModel }
+# --- Resolve KokoroUrl ---
+# Priority: -KokoroUrl param > repo-root config.json > default
+$defaultKokoroUrl = "http://localhost:8880"
+if (-not $KokoroUrl) {
+    $rootConfigFile = Join-Path $repoRoot "config.json"
+    if (Test-Path $rootConfigFile) {
+        $rootConfig = Get-Content $rootConfigFile -Raw | ConvertFrom-Json
+        if ($rootConfig.kokoroUrl) { $KokoroUrl = $rootConfig.kokoroUrl }
     }
-    $ModelPath = Join-Path $repoRoot ".piper\models\$defaultModel.onnx"
+    if (-not $KokoroUrl) { $KokoroUrl = $defaultKokoroUrl }
+}
+
+# --- Resolve kokoroVoice from project config ---
+$kokoroVoice = "af_heart"
+$configFile = Join-Path $ProjectPath "config.json"
+if (Test-Path $configFile) {
+    $config = Get-Content $configFile -Raw | ConvertFrom-Json
+    if ($config.kokoroVoice) { $kokoroVoice = $config.kokoroVoice }
 }
 
 $ProjectPath = Resolve-Path $ProjectPath | Select-Object -ExpandProperty Path
@@ -55,11 +65,6 @@ foreach ($dir in @($imagesDir, $audioDir, $outputDir)) {
     }
 }
 
-if (-not (Test-Path $ModelPath)) {
-    Write-Error "Piper model not found at: $ModelPath"
-    exit 1
-}
-
 $slides = Get-ChildItem -Path $slidesDir -Filter "*.md" | Sort-Object Name
 
 if ($slides.Count -eq 0) {
@@ -68,6 +73,7 @@ if ($slides.Count -eq 0) {
 }
 
 Write-Host "Rendering $($slides.Count) slide(s) in: $ProjectPath"
+Write-Host "Kokoro: $KokoroUrl (voice: $kokoroVoice)"
 Write-Host ""
 
 $segments = [System.Collections.Generic.List[string]]::new()
@@ -86,21 +92,31 @@ foreach ($slide in $slides) {
         exit 1
     }
 
-    # --- 2. piper: text -> WAV ---
+    # --- 2. kokoro: text -> WAV ---
     $scriptFile = Join-Path $scriptsDir "$base.txt"
     $hasAudio   = Test-Path $scriptFile
     if ($hasAudio) {
-        Write-Host "[piper] $base.txt -> slide-audio\$base.wav"
+        Write-Host "[kokoro] $base.txt -> slide-audio\$base.wav"
         $scriptText = Get-Content $scriptFile -Raw -Encoding UTF8
-        # Normalize Unicode typographic characters that piper cannot handle.
+        # Normalize Unicode typographic characters.
         $scriptText = $scriptText -replace '\u2014', ' - '   # em dash —
         $scriptText = $scriptText -replace '\u2013', ' - '   # en dash –
         $scriptText = $scriptText -replace '[\u201C\u201D]', '"'  # curly double quotes
         $scriptText = $scriptText -replace '[\u2018\u2019]', "'"  # curly single quotes
-        $scriptText |
-            & piper --model $ModelPath --output_file $wavFile
+        $body = @{
+            model           = "kokoro"
+            input           = $scriptText
+            voice           = $kokoroVoice
+            response_format = "wav"
+        } | ConvertTo-Json
+        Invoke-RestMethod `
+            -Uri "$KokoroUrl/v1/audio/speech" `
+            -Method Post `
+            -ContentType "application/json" `
+            -Body $body `
+            -OutFile $wavFile
         if (-not (Test-Path $wavFile)) {
-            Write-Error "piper failed to produce audio for: $base.txt"
+            Write-Error "Kokoro failed to produce audio for: $base.txt"
             exit 1
         }
     } else {

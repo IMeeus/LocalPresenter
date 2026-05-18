@@ -1,6 +1,6 @@
 ---
 name: render-presentation
-description: Renders a presentation project into a video by converting slides to images with marp, generating audio with piper, and combining them with ffmpeg. Use when a user asks to render, generate, build, or produce a video from a presentation project.
+description: Renders a presentation project into a video by converting slides to images with marp, generating audio with Kokoro-FastAPI, and combining them with ffmpeg. Use when a user asks to render, generate, build, or produce a video from a presentation project.
 allowed-tools: shell
 ---
 
@@ -28,13 +28,42 @@ When asked to render a presentation project into a video:
 
 The `render.ps1` script runs the full pipeline:
 1. **marp** — converts each `slides/NN-*.md` to a PNG in `slide-images/`
-2. **piper** — converts each `slide-audio-scripts/NN-*.txt` to a WAV in `slide-audio/`
+2. **Kokoro-FastAPI** — calls the local Kokoro TTS server to convert each `slide-audio-scripts/NN-*.txt` to a WAV in `slide-audio/`
 3. **ffmpeg** — combines each PNG + WAV into a per-slide MP4 segment
 4. **ffmpeg** — concatenates all segments into `output/presentation.mp4`
+
+## Configuration
+
+Settings are split across two `config.json` files:
+
+**Repo-root `config.json`** (global):
+```json
+{ "kokoroUrl": "http://localhost:8880" }
+```
+
+**Per-project `config.json`** (project-specific):
+```json
+{ "kokoroVoice": "af_heart" }
+```
+
+| Field | Scope | Default | Description |
+|---|---|---|---|
+| `kokoroUrl` | repo-root | `http://localhost:8880` | Base URL of the Kokoro-FastAPI server |
+| `kokoroVoice` | per-project | `af_heart` | Kokoro voice name for this project |
+
+The `-KokoroUrl` parameter on `render.ps1` overrides `kokoroUrl` from config.
+
+### Pause tags in audio scripts
+
+Audio scripts can embed timed pauses using `[pause:Xs]` syntax (Kokoro handles these natively):
+
+```
+Welcome to the demo. [pause:1.5s] Now let's get started.
+```
 
 ## Troubleshooting
 
 - If a slide has no matching audio script, the render will skip narration and use 3 seconds as the slide duration
-- Ensure piper and marp are on the system PATH
-- Ensure ffmpeg is available on the system PATH
-- The piper voice model must be present at `.piper/models/en_US-lessac-medium.onnx` in the repo root
+- Ensure the **Kokoro-FastAPI** server is running before rendering (`docker run -p 8880:8880 ghcr.io/remsky/kokoro-fastapi-cpu:latest` or GPU equivalent)
+- Ensure **marp** and **ffmpeg** are available on the system PATH
+- Check `kokoroUrl` in the repo-root `config.json` if the server is on a non-default host/port
