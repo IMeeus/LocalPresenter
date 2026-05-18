@@ -7,7 +7,7 @@
       2. kokoro — converts each slide-audio-scripts/NN-*.txt to WAV in slide-audio/
                   via the Kokoro-FastAPI server (supports [pause:Xs] tags)
       3. ffmpeg — combines each PNG + WAV into a per-slide MP4 segment
-      4. ffmpeg — concatenates all segments into output/presentation.mp4
+      4. ffmpeg — concatenates all segments into output/presentation.mp4 (or presentation-vN.mp4 if one already exists)
 
 .PARAMETER ProjectPath
     Absolute path to the project folder (must contain a 'slides' subfolder).
@@ -157,12 +157,19 @@ foreach ($slide in $slides) {
 }
 
 # --- 4. ffmpeg: concatenate segments -> presentation.mp4 ---
-$concatFile       = Join-Path $outputDir "concat.txt"
+$concatFile = Join-Path $outputDir "concat.txt"
+
+# Determine versioned output filename: presentation.mp4, presentation-v1.mp4, presentation-v2.mp4, ...
 $presentationFile = Join-Path $outputDir "presentation.mp4"
+if (Test-Path $presentationFile) {
+    $v = 1
+    while (Test-Path (Join-Path $outputDir "presentation-v$v.mp4")) { $v++ }
+    $presentationFile = Join-Path $outputDir "presentation-v$v.mp4"
+}
 
 $segments | Set-Content $concatFile -Encoding UTF8
 
-Write-Host "[ffmpeg] Concatenating $($segments.Count) segment(s) into presentation.mp4 ..."
+Write-Host "[ffmpeg] Concatenating $($segments.Count) segment(s) into $(Split-Path $presentationFile -Leaf) ..."
 & ffmpeg -y -f concat -safe 0 -i $concatFile -c copy $presentationFile 2>&1 | Write-Verbose
 
 if (-not (Test-Path $presentationFile)) {

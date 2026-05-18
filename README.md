@@ -32,12 +32,12 @@ Kokoro-FastAPI runs as a Docker container. Start it once before rendering any pr
 
 **CPU (no GPU required):**
 ```bash
-docker run -p 8880:8880 ghcr.io/remsky/kokoro-fastapi-cpu:latest
+docker run -d --name kokoro -p 8880:8880 ghcr.io/remsky/kokoro-fastapi-cpu:latest
 ```
 
 **GPU (NVIDIA CUDA):**
 ```bash
-docker run --gpus all -p 8880:8880 ghcr.io/remsky/kokoro-fastapi-gpu:latest
+docker run -d --name kokoro-on-steriods --gpus all -p 8880:8880 ghcr.io/remsky/kokoro-fastapi-gpu:latest
 ```
 
 Keep the container running while you render. You can stop it with `Ctrl+C` or `docker stop <container-id>`.

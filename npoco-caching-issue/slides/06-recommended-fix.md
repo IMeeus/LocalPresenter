@@ -5,7 +5,7 @@ theme: default
 
 # Recommended Fix: Fork & Patch NPoco
 
-Since we already maintain a fork, the cleanest fix is a **5-line patch** directly in NPoco's `MappingFactory`:
+The cleanest fix is to create a **dedicated NPoco fork** and apply a **5-line patch** directly in `MappingFactory`:
 
 ```csharp
 // MappingFactory.cs (NPoco fork)
@@ -30,4 +30,4 @@ private static void AddConverterToStack(ILGenerator il, Func<object, object> con
 
 ✅ Fixes the root cause — no more race on the converter list  
 ✅ Protects **all** NPoco fetch paths, not just our call site  
-✅ Fork already exists — add a comment explaining why
+✅ Add a comment in the fork explaining why the patch exists
