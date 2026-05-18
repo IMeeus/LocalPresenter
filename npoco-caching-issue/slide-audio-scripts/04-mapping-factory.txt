@@ -1,0 +1,5 @@
+Tracing into NPoco's internals leads us to MappingFactory — the component responsible for turning database column values into dot net types. For simple value types like integers, strings, and dates, this is straightforward — no special handling needed. But for complex types, like an aggregate reference to a user or a workflow, a custom converter function is used.
+
+The first time a factory is needed for a given type, NPoco generates it at runtime by emitting intermediate language code. Each custom converter is stored in a static, process-wide list. And the key detail here is that the converter's position in that list — its index — is permanently baked into the generated code at the time the factory is built.
+
+Once built, that factory is stored in NPoco's process-wide memory cache, so every subsequent request for the same type reuses the same generated code. That caching is exactly what makes the next part so consequential.
