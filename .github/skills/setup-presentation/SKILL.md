@@ -23,6 +23,7 @@ When asked to set up or initialize a new presentation project:
 3. Confirm to the user that the project has been created and describe the folder structure that was set up.
 
 4. Tell the user what to do next:
+   - Drop any source material (docs, notes, articles) into `<project-name>/context/` — Copilot will use these as the basis for slide and narration content
    - Add slides to `<project-name>/slides/` as markdown files named `NN-description.md` (e.g. `01-intro.md`)
    - Add matching audio scripts to `<project-name>/slide-audio-scripts/` as `.txt` files with the same base name
    - Run the `/render-presentation` skill when ready to generate the video
@@ -31,3 +32,4 @@ When asked to set up or initialize a new presentation project:
 
 - The script creates placeholder files (`01-title.md` and `01-title.txt`) so the project is ready to use immediately
 - Generated folders (`slide-audio/`, `slide-images/`, `output/`) are already listed in `.gitignore`
+- The `context/` folder holds source material (e.g. markdown docs, notes) that informs the presentation content

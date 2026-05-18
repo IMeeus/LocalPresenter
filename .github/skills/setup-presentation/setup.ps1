@@ -30,7 +30,8 @@ if (Test-Path $projectPath) {
         "slide-audio-scripts",
         "slide-audio",
         "slide-images",
-        "output"
+        "output",
+        "context"
     )
     foreach ($folder in $folders) {
         New-Item -ItemType Directory -Path (Join-Path $projectPath $folder) -Force | Out-Null

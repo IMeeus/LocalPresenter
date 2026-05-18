@@ -11,7 +11,17 @@ When asked to add or update content in a presentation project, follow these step
 
 Ask the user for the project name if it isn't clear from context. Verify that the project folder exists under the repo root.
 
-## 2. Determine what to change
+## 2. Read context files
+
+Before writing any slide or narration content, check whether the project has a `context/` folder:
+
+```
+<project-name>/context/
+```
+
+If it exists, read all files in it. These files contain the source material — documentation, notes, articles, or other reference content — that the presentation should be based on. Use this material as the primary source of truth for slide content and narration. Do not invent facts that aren't supported by the context.
+
+## 3. Determine what to change
 
 Ask the user what they want to add or update:
 - New slides
@@ -19,7 +29,7 @@ Ask the user what they want to add or update:
 - New audio scripts
 - Updated narration
 
-## 3. Work on the slides folder
+## 4. Work on the slides folder
 
 Slides live in `<project-name>/slides/` and follow the naming convention `NN-description.md` where:
 - `NN` is a zero-padded number (e.g. `01`, `02`, `03`)
@@ -40,7 +50,7 @@ Slide content here...
 
 When adding a new slide, pick the next available number in sequence. When updating an existing slide, preserve its filename.
 
-## 4. Work on the audio scripts folder
+## 5. Work on the audio scripts folder
 
 Audio scripts live in `<project-name>/slide-audio-scripts/` and have the **same base filename** as their corresponding slide, but with a `.txt` extension.
 
@@ -48,14 +58,14 @@ For example: `slides/02-overview.md` → `slide-audio-scripts/02-overview.txt`
 
 The text in the script is exactly what will be spoken aloud for that slide. Write it in natural spoken language (not markdown).
 
-**Audio script authoring rules — avoid characters piper cannot handle:**
+**Audio script authoring rules — avoid characters Kokoro may mishandle:**
 - ❌ `—` (em dash), `–` (en dash) → use ` - ` instead
 - ❌ `"` `"` (curly double quotes) → use `"` straight double quotes
 - ❌ `'` `'` (curly single quotes / apostrophes) → use `'` straight apostrophe
 
 Use plain ASCII punctuation throughout. The render pipeline will sanitize these characters as a safety net, but writing them correctly from the start avoids surprises.
 
-## 5. Summarize changes
+## 6. Summarize changes
 
 After making all changes, list what was added or updated:
 - Files created
