@@ -55,7 +55,7 @@ Example: `slides/02-overview.md` → `slide-audio-scripts/02-overview.txt`
 
 Write scripts in natural spoken language — this is exactly what will be narrated. Do not use markdown.
 
-Follow the rules in [`rules.md`](rules.md) for characters to avoid, generics/abbreviations, and pause tags.
+Follow the rules in [`audio-rules.md`](../audio-rules.md) for characters to avoid, generics/abbreviations, and pause tags.
 
 ## 6. Consistency review
 
@@ -68,7 +68,7 @@ Before handing off, review all slides and audio scripts for issues introduced by
 5. **Terminology consistency** — the same concept named differently in different files (type names, team names, etc.)
 6. **Formatting consistency** — bold/italic applied inconsistently to the same recurring term across slides
 7. **Deleted concept references** — audio or slides still reference something that was removed (a slide, a section, an option)
-8. **Audio script rules** — no em dashes (`—`), curly quotes (`"`), or generic type parameters in `.txt` files
+8. **Audio script rules** — see [`../audio-rules.md`](../audio-rules.md) for the full list (em dashes, curly quotes, generic type parameters)
 
 Fix any issues found immediately. If a fix requires a content judgment call, describe the options and ask the user.
 

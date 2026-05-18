@@ -55,17 +55,8 @@ After any slide deletion or merging, check whether remaining audio scripts or sl
 - Audio that describes fix options that no longer have a dedicated slide
 - A takeaway slide that references a section that was cut
 
-### 3.8 Audio script rules (per `rules.md`)
-Check every audio script for violations of the TTS rules:
-
-| Rule | What to check |
-|------|--------------|
-| No em dash (`—`) or en dash (`–`) | Replace with ` - ` (space-hyphen-space) |
-| No curly quotes (`"` `"` `'` `'`) | Replace with straight `"` or `'` |
-| No generic type parameters | e.g. `IEnumerable<T>` → "a sequence of items" |
-| No hard-to-pronounce abbreviations | e.g. `ldc.i4` → "a load instruction" |
-
-Regular class and method names that are pronounceable are fine (e.g. `FetchMultiple`, `ManagedCache`).
+### 3.8 Audio script rules
+Check every audio script for violations defined in [`../audio-rules.md`](../audio-rules.md). The rules cover characters to avoid (em dashes, curly quotes), generic type parameters, hard-to-pronounce abbreviations, and pause tag syntax.
 
 ### 3.9 Narrative arc
 Read the deck as a whole. Flag slides that:
