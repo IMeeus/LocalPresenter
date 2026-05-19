@@ -62,6 +62,16 @@ Audio scripts can embed timed pauses using `[pause:Xs]` syntax (Kokoro handles t
 Welcome to the demo. [pause:1.5s] Now let's get started.
 ```
 
+## Dependencies
+
+In addition to `marp`, `ffmpeg`, and the Kokoro-FastAPI server, the render script requires:
+
+| Tool | Install | Required for |
+|------|---------|--------------|
+| **mmdc** (Mermaid CLI) | `npm install -g @mermaid-js/mermaid-cli` | Slides containing Mermaid diagrams |
+
+`mmdc` must be on the system PATH. The render script will fail with a clear error if it is missing.
+
 ## Troubleshooting
 
 - If a slide has no matching audio script, the render will skip narration and use 3 seconds as the slide duration

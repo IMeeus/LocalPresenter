@@ -7,6 +7,34 @@ description: Reviews all slides and audio scripts in a presentation project for 
 
 Audit every slide and audio script in a presentation project for consistency issues. Read all files first, then work through the checklist below. Report every issue found, then fix them — no confirmation needed unless a fix requires a judgment call about content.
 
+This skill is also **read by the build-presentation skill before authoring** — the rules here govern both creation and review.
+
+## Slide content rules
+
+Marp renders slides at a fixed 1920×1080 viewport. Content that overflows is silently clipped.
+
+| Slide type | Rule |
+|---|---|
+| Text only | Max ~6 short bullet points **or** ~150 words of body text |
+| With one image | Max ~3–4 short bullet points alongside the image |
+| With a Mermaid diagram | **Dedicated slide only** — no bullet points; the audio script carries the explanation |
+
+When in doubt, split content across two slides.
+
+For controlling image and text sizing, refer to the official Marp documentation:
+- Image sizing (width/height attributes, background images): https://marpit.marp.app/image-syntax
+- Fitting header and other directives: https://marpit.marp.app/directives
+
+## Audio script rules
+
+All audio scripts must follow the rules in [`../audio-rules.md`](../audio-rules.md). These cover:
+- Characters to avoid (em dashes, en dashes, curly quotes)
+- No generics or hard-to-pronounce abbreviations
+- No possessives on single letters or abbreviations
+- No hyphenated compound verb phrases
+- Pause tag syntax (`[pause:Xs]`)
+
+
 ## 1. Identify the project
 
 Determine the project name from the user's request, or ask if it isn't clear.
@@ -56,13 +84,19 @@ After any slide deletion or merging, check whether remaining audio scripts or sl
 - A takeaway slide that references a section that was cut
 
 ### 3.8 Audio script rules
-Check every audio script for violations defined in [`../audio-rules.md`](../audio-rules.md). The rules cover characters to avoid (em dashes, curly quotes), generic type parameters, hard-to-pronounce abbreviations, and pause tag syntax.
+Check every audio script for violations defined in the **Audio script rules** section above (and in [`../audio-rules.md`](../audio-rules.md)).
 
 ### 3.9 Narrative arc
 Read the deck as a whole. Flag slides that:
 - Substantially repeat content already covered by another slide
 - Assume context that hasn't been established yet
 - Leave a concept introduced but never resolved
+
+### 3.10 Slide content limits
+Check every slide against the **Slide content rules** defined above. Flag any slide that:
+- Has more than ~6 bullet points or ~150 words of body text (text-only slide)
+- Has more than ~3–4 bullet points alongside an image
+- Has a Mermaid diagram alongside bullet points (diagrams must be on a dedicated slide)
 
 ## 4. Report findings
 

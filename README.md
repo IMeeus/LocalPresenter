@@ -23,6 +23,7 @@ Each slide gets its own PNG image and its own WAV audio file. The duration of th
 |------|---------|
 | **ffmpeg** | [ffmpeg.org/download.html](https://ffmpeg.org/download.html) — add to PATH |
 | **marp-cli** | `npm install -g @marp-team/marp-cli` |
+| **mmdc** | `npm install -g @mermaid-js/mermaid-cli` — required for Mermaid diagrams in slides |
 | **Docker** | [docs.docker.com/get-docker](https://docs.docker.com/get-docker/) — required to run Kokoro-FastAPI |
 | **Kokoro-FastAPI** | See below |
 

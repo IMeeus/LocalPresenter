@@ -4,6 +4,8 @@
 
     Pipeline:
       1. marp   — converts each slides/NN-*.md to a PNG in slide-images/
+                  Local images are supported. Mermaid diagrams are pre-rendered
+                  to PNG via mmdc before marp runs.
       2. kokoro — converts each slide-audio-scripts/NN-*.txt to WAV in slide-audio/
                   via the Kokoro-FastAPI server (supports [pause:Xs] tags)
       3. ffmpeg — combines each PNG + WAV into a per-slide MP4 segment
@@ -27,6 +29,55 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+
+# --- Check required tools ---
+foreach ($tool in @("marp", "ffmpeg", "mmdc")) {
+    if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) {
+        Write-Error "'$tool' was not found on PATH. Please install it before rendering."
+        exit 1
+    }
+}
+
+# --- Mermaid pre-rendering ---
+# Replaces ```mermaid blocks in a slide with PNG images rendered by mmdc.
+# Temp files (_tmp_*) are written alongside the original slide so that relative
+# image paths in the slide continue to resolve correctly.
+# Returns the path to the (possibly new) slide file to pass to marp.
+function Get-ProcessedSlidePath {
+    param([string]$SlidePath)
+
+    $content = Get-Content $SlidePath -Raw -Encoding UTF8
+    if ($content -notmatch '```mermaid') { return $SlidePath }
+
+    $dir  = Split-Path $SlidePath -Parent
+    $base = [System.IO.Path]::GetFileNameWithoutExtension($SlidePath)
+    $idx  = 0
+    $regex = [regex]'(?s)```mermaid\r?\n(.*?)```'
+
+    while ($content -match '(?s)```mermaid\r?\n.*?```') {
+        $idx++
+        $m       = $regex.Match($content)
+        $mmdFile = Join-Path $dir "_tmp_$base-mermaid-$idx.mmd"
+        $pngName = "_tmp_$base-mermaid-$idx.png"
+        $pngFile = Join-Path $dir $pngName
+
+        [System.IO.File]::WriteAllText($mmdFile, $m.Groups[1].Value, [System.Text.Encoding]::UTF8)
+        & mmdc -i $mmdFile -o $pngFile -b white 2>&1 | Write-Verbose
+        Remove-Item $mmdFile -Force -ErrorAction SilentlyContinue
+
+        if (-not (Test-Path $pngFile)) {
+            Write-Error "mmdc failed to render Mermaid diagram $idx in: $(Split-Path $SlidePath -Leaf)"
+            exit 1
+        }
+
+        $content = $content.Substring(0, $m.Index) + "![]($pngName)" + $content.Substring($m.Index + $m.Length)
+    }
+
+    $tempSlide = Join-Path $dir "_tmp_$base.md"
+    [System.IO.File]::WriteAllText($tempSlide, $content, [System.Text.Encoding]::UTF8)
+    return $tempSlide
+}
+
 
 # Resolve repo root (script is at .github/skills/render-presentation/render.ps1)
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..") | Select-Object -ExpandProperty Path
@@ -71,7 +122,9 @@ Get-ChildItem -Path $imagesDir | Remove-Item -Force -Recurse
 Get-ChildItem -Path $audioDir  | Remove-Item -Force -Recurse
 Write-Host ""
 
-$slides = Get-ChildItem -Path $slidesDir -Filter "*.md" | Sort-Object Name
+$slides = Get-ChildItem -Path $slidesDir -Filter "*.md" |
+    Where-Object { $_.Name -notlike "_tmp_*" } |
+    Sort-Object Name
 
 if ($slides.Count -eq 0) {
     Write-Error "No .md files found in: $slidesDir"
@@ -84,6 +137,7 @@ Write-Host ""
 
 $segments = [System.Collections.Generic.List[string]]::new()
 
+try {
 foreach ($slide in $slides) {
     $base    = $slide.BaseName
     $imgFile = Join-Path $imagesDir "$base.png"
@@ -92,7 +146,10 @@ foreach ($slide in $slides) {
 
     # --- 1. marp: markdown -> PNG ---
     Write-Host "[marp]  $($slide.Name) -> slide-images\$base.png"
-    & marp $slide.FullName --image png --output $imgFile 2>&1 | Write-Verbose
+    $slideToRender = Get-ProcessedSlidePath -SlidePath $slide.FullName
+    & marp $slideToRender --image png --allow-local-files --output $imgFile 2>&1 | Write-Verbose
+    # Clean up any _tmp_* files created for this slide
+    Get-ChildItem -Path $slidesDir -Filter "_tmp_$base*" -ErrorAction SilentlyContinue | Remove-Item -Force
     if (-not (Test-Path $imgFile)) {
         Write-Error "marp failed to produce image for: $($slide.Name)"
         exit 1
@@ -182,6 +239,10 @@ Remove-Item $concatFile -Force
 foreach ($line in $segments) {
     $segPath = $line -replace "^file '(.+)'$", '$1'
     if (Test-Path $segPath) { Remove-Item $segPath -Force }
+}
+} finally {
+    # Ensure no _tmp_* files are left in the slides dir (e.g. on error)
+    Get-ChildItem -Path $slidesDir -Filter "_tmp_*" -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
 }
 
 Write-Host "Done! Video saved to: $presentationFile"
