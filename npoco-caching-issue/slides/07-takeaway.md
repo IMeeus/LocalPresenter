@@ -11,4 +11,4 @@ theme: default
 
 **The lesson:** When a third-party library uses static mutable state for one-time initialisation, concurrent startup is a hidden risk — widest at exactly the moment traffic arrives on a fresh process.
 
-**What's next:** Team Bravas will create a dedicated NPoco fork and apply the patch to ship the fix as soon as possible.
+**What's next:** **Team Bravas** will create a dedicated NPoco fork and apply the patch to ship the fix as soon as possible.

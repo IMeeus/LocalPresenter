@@ -30,4 +30,3 @@ private static void AddConverterToStack(ILGenerator il, Func<object, object> con
 
 ✅ Fixes the root cause — no more race on the converter list  
 ✅ Protects **all** NPoco fetch paths, not just our call site  
-✅ Add a comment in the fork explaining why the patch exists
