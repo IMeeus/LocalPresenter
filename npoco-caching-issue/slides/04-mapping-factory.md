@@ -7,7 +7,7 @@ theme: default
 
 *Root cause: deep inside `MappingFactory` — the component responsible for turning database column values into .NET types.*
 
-On first use, NPoco generates a factory delegate via IL emission. Each custom converter is stored in a **static, process-wide list** — and its position in that list is **permanently baked** into the generated IL:
+Each custom converter is stored in a **static, process-wide list** — and its position in that list is **permanently baked** into the generated IL:
 
 ```csharp
 static List<Func<object, object>> m_Converters = new List<Func<object, object>>();
